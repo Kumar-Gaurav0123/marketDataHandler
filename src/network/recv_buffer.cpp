@@ -1,5 +1,3 @@
-#ifdef __linux__
-
 #include "network/recv_buffer.hpp"
 
 #include <sys/socket.h>
@@ -48,5 +46,3 @@ size_t RecvBuffer::length(size_t idx) const noexcept {
 }
 
 } // namespace network
-
-#endif // __linux__

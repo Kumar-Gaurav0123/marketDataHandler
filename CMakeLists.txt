@@ -10,27 +10,25 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# ---- Default to Release if not set ----
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 
-# ---- Collect sources ----
-file(GLOB_RECURSE SRC_FILES
-    include/**/*.cpp
+# ---- Core library (all sources except main) ----
+file(GLOB_RECURSE LIB_SOURCES
+    src/app/*.cpp
+    src/core/*.cpp
+    src/network/*.cpp
 )
 
-# ---- Create executable ----
-add_executable(feed_handler ${SRC_FILES})
+add_library(mdh_lib STATIC ${LIB_SOURCES})
 
-# ---- Include directories ----
-target_include_directories(feed_handler
-    PRIVATE
+target_include_directories(mdh_lib
+    PUBLIC
         ${PROJECT_SOURCE_DIR}/include
 )
 
-# ---- Compiler flags ----
-target_compile_options(feed_handler
+target_compile_options(mdh_lib
     PRIVATE
         -Wall
         -Wextra
@@ -39,5 +37,37 @@ target_compile_options(feed_handler
         $<$<CONFIG:Debug>:-g -O0>
 )
 
-# ---- Link libraries ----
-target_link_libraries(feed_handler pthread)
+target_link_libraries(mdh_lib pthread)
+
+# ---- Executable ----
+add_executable(feed_handler src/main.cpp)
+target_link_libraries(feed_handler mdh_lib)
+
+# ---- Tests ----
+option(BUILD_TESTS "Build unit tests" ON)
+
+if(BUILD_TESTS)
+    include(FetchContent)
+    FetchContent_Declare(
+        doctest
+        GIT_REPOSITORY https://github.com/doctest/doctest.git
+        GIT_TAG        v2.4.11
+    )
+    FetchContent_MakeAvailable(doctest)
+
+    add_executable(run_tests
+        tests/test_fix_parser.cpp
+        tests/test_ring_buffer.cpp
+    )
+
+    target_link_libraries(run_tests mdh_lib doctest::doctest)
+
+    target_compile_options(run_tests
+        PRIVATE
+            -Wall -Wextra
+            $<$<CONFIG:Debug>:-g -O0>
+    )
+
+    enable_testing()
+    add_test(NAME unit_tests COMMAND run_tests)
+endif()

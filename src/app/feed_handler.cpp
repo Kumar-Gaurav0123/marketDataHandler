@@ -1,5 +1,3 @@
-#ifdef __linux__
-
 #include "app/feed_handler.hpp"
 
 #include "core/timestamp.hpp"
@@ -32,8 +30,6 @@ void FeedHandler::handle_packets(int count) noexcept {
             [](int tag, const uint8_t* value, size_t /*vlen*/) noexcept {
                 // Tag 35 = MsgType
                 if (tag == 35) {
-                    // value[0] -> FIX MsgType
-                    // Intentionally unused for now
                     (void)value;
                 }
             }
@@ -46,5 +42,3 @@ void FeedHandler::handle_packets(int count) noexcept {
 }
 
 } // namespace app
-
-#endif // __linux__

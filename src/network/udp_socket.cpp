@@ -1,5 +1,3 @@
-#ifdef __linux__
-
 #include "network/udp_socket.hpp"
 
 #include <sys/socket.h>
@@ -57,5 +55,3 @@ void UdpSocket::set_recv_buffer(int bytes) {
 }
 
 } // namespace network
-
-#endif // __linux__

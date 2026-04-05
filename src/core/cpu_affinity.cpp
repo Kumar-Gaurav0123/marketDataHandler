@@ -1,5 +1,7 @@
 #include "core/cpu_affinity.hpp"
 
+#ifdef __linux__
+
 #include <pthread.h>
 #include <sched.h>
 #include <stdexcept>
@@ -23,3 +25,5 @@ void pin_thread_to_cpu(int cpu_id) {
 }
 
 } // namespace core
+
+#endif // __linux__

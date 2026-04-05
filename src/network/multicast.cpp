@@ -1,5 +1,3 @@
-#ifdef __linux__
-
 #include "network/multicast.hpp"
 
 #include <sys/socket.h>
@@ -27,5 +25,3 @@ void join_multicast(int socket_fd,
 }
 
 } // namespace network
-
-#endif // __linux__

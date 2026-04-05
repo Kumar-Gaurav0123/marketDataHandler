@@ -1,6 +1,6 @@
-#ifdef __linux__
-
 #include "core/event_loop.hpp"
+
+#ifdef __linux__
 
 #include <stdexcept>
 #include <cstring>
@@ -37,7 +37,7 @@ void EventLoop::mod_fd(int fd, uint32_t events) {
     epoll_event ev;
     std::memset(&ev, 0, sizeof(ev));
     ev.events = events;
-    ev.data.ptr = handlers_.at(fd); // preserve the registered handler
+    ev.data.ptr = handlers_.at(fd);
 
     if (epoll_ctl(epoll_fd_, EPOLL_CTL_MOD, fd, &ev) < 0) {
         throw std::runtime_error("epoll_ctl MOD failed");

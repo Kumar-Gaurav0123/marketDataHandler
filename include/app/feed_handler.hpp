@@ -14,6 +14,7 @@ public:
     explicit FeedHandler(network::UdpSocket& socket);
 
     void on_event(uint32_t events) noexcept override;
+    uint64_t avg_latency_cycles() const noexcept { return latency_.avg_cycles(); }
 
 private:
     void handle_packets(int count) noexcept;

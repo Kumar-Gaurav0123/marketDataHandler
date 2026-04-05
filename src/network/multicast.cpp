@@ -12,8 +12,13 @@ void join_multicast(int socket_fd,
                     const std::string& multicast_ip,
                     const std::string& interface_ip) {
     ip_mreq mreq{};
-    mreq.imr_multiaddr.s_addr = inet_addr(multicast_ip.c_str());
-    mreq.imr_interface.s_addr = inet_addr(interface_ip.c_str());
+
+    if (inet_pton(AF_INET, multicast_ip.c_str(), &mreq.imr_multiaddr) != 1) {
+        throw std::runtime_error("Invalid multicast IP: " + multicast_ip);
+    }
+    if (inet_pton(AF_INET, interface_ip.c_str(), &mreq.imr_interface) != 1) {
+        throw std::runtime_error("Invalid interface IP: " + interface_ip);
+    }
 
     if (setsockopt(socket_fd,
                    IPPROTO_IP,

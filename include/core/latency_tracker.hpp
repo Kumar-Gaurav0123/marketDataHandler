@@ -13,13 +13,16 @@ public:
     }
 
     uint64_t avg_cycles() const noexcept {
-        uint64_t c = count_.load();
-        return c ? total_.load() / c : 0;
+        // acquire pairs with the relaxed fetch_add stores above — ensures we
+        // see fully committed values and not a torn read across count/total.
+        uint64_t c = count_.load(std::memory_order_acquire);
+        uint64_t t = total_.load(std::memory_order_acquire);
+        return c ? t / c : 0;
     }
 
 private:
-    std::atomic<uint64_t> count_{0};
-    std::atomic<uint64_t> total_{0};
+    alignas(64) std::atomic<uint64_t> count_{0};
+    alignas(64) std::atomic<uint64_t> total_{0};
 };
 
 } // namespace core

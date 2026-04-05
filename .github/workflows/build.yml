@@ -7,21 +7,70 @@ on:
     branches: [ "master", "main" ]
 
 jobs:
-  build:
+  # ---- Release build (GCC) ----
+  build-release:
+    name: Release (GCC)
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Install dependencies
         run: sudo apt-get install -y cmake g++ ninja-build
 
-      - name: Configure (Release)
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
+      - name: Configure
+        run: cmake -B build/release -G Ninja
+             -DCMAKE_BUILD_TYPE=Release
+             -DBUILD_TESTS=ON
+             -DCMAKE_CXX_FLAGS="-Werror"
 
       - name: Build
-        run: cmake --build build --parallel
+        run: cmake --build build/release --parallel
 
-      - name: Run tests
-        run: ./build/run_tests
+      - name: Test
+        run: ./build/release/run_tests
+
+  # ---- Debug + AddressSanitizer + UBSan (GCC) ----
+  sanitizers:
+    name: ASan + UBSan (GCC)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get install -y cmake g++ ninja-build
+
+      - name: Configure
+        run: cmake -B build/san -G Ninja
+             -DCMAKE_BUILD_TYPE=Debug
+             -DBUILD_TESTS=ON
+             -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -Werror"
+             -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
+
+      - name: Build
+        run: cmake --build build/san --parallel
+
+      - name: Test
+        run: ./build/san/run_tests
+
+  # ---- Clang build ----
+  build-clang:
+    name: Release (Clang)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get install -y cmake clang ninja-build
+
+      - name: Configure
+        run: cmake -B build/clang -G Ninja
+             -DCMAKE_BUILD_TYPE=Release
+             -DCMAKE_CXX_COMPILER=clang++
+             -DBUILD_TESTS=ON
+             -DCMAKE_CXX_FLAGS="-Werror"
+
+      - name: Build
+        run: cmake --build build/clang --parallel
+
+      - name: Test
+        run: ./build/clang/run_tests
